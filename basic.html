@@ -1,0 +1,64 @@
+<div id="pixel"></div>
+<script>
+  var img = "https://avatars3.githubusercontent.com/u/1234766?s=140"
+  var x = 50;
+  var y = 50;
+  window.addEventListener("keydown", onKeyDown, false);
+	window.addEventListener("keyup", onKeyUp, false);
+	var key_w=false;
+	var key_a=false;
+	var key_s=false;
+	var key_d=false;
+
+	function onKeyDown(event){
+	  var keyCode = event.keyCode;
+	  //console.log(keyCode);
+	  switch(keyCode){
+	  	case 87:  //w
+	        key_w = true;
+	    break;
+	    case 68:  //d
+	        key_d = true;
+	    break;
+	    case 83:  //s
+	        key_s = true;
+	    break;
+	    case 65:  //a
+	        key_a = true;
+	    break;
+	  	}
+	}
+
+	function onKeyUp(event){
+	  var keyCode = event.keyCode;
+	  switch(keyCode){
+	    case 87:  //w
+	        key_w = false;
+	    break;
+	    case 68:  //d
+	        key_d = false;
+	    break;
+	    case 83:  //s
+	        key_s = false;
+	    break;
+	    case 65: //a
+	        key_a = false;
+	    break;
+	  	}
+	 }
+
+	 var input = function(){
+	 	if(key_w){y = y - 1;}
+	 	if(key_s){y = y + 1;}
+	 	if(key_a){x = x - 1;}
+	 	if(key_d){x = x + 1;}
+	 }
+	 
+	 
+	function tick(){
+		input();
+		document.getElementById("pixel").innerHTML = '<img src="' + img + '" style="position:absolute;left:' + x + 'px;top:' + y + 'px;">';
+	}
+
+	setInterval(tick,1000/60);
+</script>
