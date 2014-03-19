@@ -1,0 +1,299 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Sqube</title>
+
+</head>
+
+<body>
+<div id="pixel" style="width:600px;height:300px;border-radius:25px;background-color:#CEF;"></div>
+<script>
+ 	var w = 600;
+  	var h = 300;
+
+  	var x = 0;
+  	var y = 0;
+  	var z = 0;
+
+  	var u = 50;
+  	var p = 0;
+  	var r = 0;
+
+  	var Pixel = function(x,y,z,s,c){
+	 	this.x = x;
+	 	this.y = y;
+	 	this.z = z;
+	 	this.s = s;
+	 	this.c = c;
+	}
+
+	var Point = function(x,y,z,c){
+	 	this.x = x;
+	 	this.y = y;
+	 	this.z = z;
+	 	this.c = c;
+	 	//this.s = s;
+	}
+
+	var Object = function(){
+		var self = this;
+		// X Y Z
+		this.x = 0;
+		this.y = 0;
+		this.z = 0;
+
+		// Yaw Pitch Roll
+		this.u = 0;
+		this.p = 0;
+		this.r = 0;
+
+		// Data
+		this.d = [];
+
+		this.point = function(x,y,z,c){
+			self.d.push(new Point(x,y,z,c));
+		}
+	}
+
+	function rotate(d,u,p,r){
+		var a = [];
+		var siny = Math.sin(u * Math.PI/180);
+		var cosy = Math.cos(u * Math.PI/180);
+		var sinp = Math.sin(p * Math.PI/180);
+		var cosp = Math.cos(p * Math.PI/180);
+		var sinr = Math.sin(r * Math.PI/180);
+		var cosr = Math.cos(r * Math.PI/180);
+
+		for(var i = 0; i < d.length; i++){
+			var v = d[i];
+							//object x
+					var x = (1 * ((cosp*cosr) * v.x  + ((-cosy)*sinr+siny*sinp*cosr) * v.y + (siny*sinr+cosy*sinp*cosr) * v.z));
+					//object y
+					var y = (1 * ((cosp*sinr) * v.x + (cosy*cosr + siny*sinp*sinr) * v.y + ((-siny)*cosr + cosy*sinp*sinr) * v.z));
+					//object z
+					var z = (1 * ((-sinp) * v.x + (siny*cosp) * v.y + (cosy*cosp) * v.z));
+					
+			var c = v.c;
+			a[i] = new Point(x,y,z,c);
+		}
+		return a;
+	}
+
+	function translate(d,x,y,z){
+		var a = [];
+		for(var i = 0; i < d.length; i++){
+			a[i] = new Point(d[i].x+x,d[i].y+y,d[i].z+z,d[i].c);
+		}
+		return a;
+	}
+
+	function flatten(d){
+		var a = [];
+
+		for(var i = 0; i < d.length; i++){
+
+			// X Y Z COLOR Z-INDEX
+			var x = - d[i].x / d[i].z;
+			var y = d[i].y / d[i].z;
+			var z = (1000000-1000*Math.sqrt(d[i].z*d[i].z+d[i].x*d[i].x));
+			var s = -1/d[i].z;
+			var c = d[i].c;
+			if(d[i].z >=0 ){
+				s = 0;
+				x = 0;
+				y = 0;
+				c="transparent";
+				z = 0;
+			}
+			a[i] = new Pixel(x,y,z,s,c);
+		
+		}
+		return a;
+	}
+
+	function draw(d){
+		var a = ""
+		for(var i = 0; i < d.length; i++){
+		var s = Math.floor(d[i].s*1.45*(w/2));
+		var z = Math.floor(d[i].z)  //-Math.sqrt((d[i].x)*(w/2)*(d[i].x)*(w/2)+(d[i].y)*(w/2)*(d[i].y)*(w/2)));
+		var x = Math.floor(((d[i].x)*(w/2))+(w/2)-(s/2));
+		var y = Math.floor(((d[i].y)*(w/2))+(h/2)-(s/2));
+		z = z + 2000 - y;
+		var c = d[i].c;
+		var a = a + "<div style ='position:absolute;top:" +y+ "px;left:" +x+ "px;width:" +s+ "px;height:" +s+ "px;background-color:" +c+ ";border:0px solid #000;z-index:"+z+";border-radius:"+(.3*s)+"px;'></div>";
+		}
+		 return a;
+	}
+
+
+	window.addEventListener("keydown", onKeyDown, false);
+	window.addEventListener("keyup", onKeyUp, false);
+	var key_w=false;
+	var key_a=false;
+	var key_s=false;
+	var key_d=false;
+	var key_z=false;
+	var key_x=false;
+	var key_c=false;
+
+	function onKeyDown(event){
+	  var keyCode = event.keyCode;
+	  //console.log(keyCode);
+	  switch(keyCode){
+	  	case 87:  //w
+	        key_w = true;
+	    break;
+	    case 68:  //d
+	        key_d = true;
+	    break;
+	    case 83:  //s
+	        key_s = true;
+	    break;
+	    case 65:  //a
+	        key_a = true;
+	    break;
+	    case 90:
+	        key_z = true;
+	    break;
+	    case 88:
+	        key_x = true;
+	    break;
+	    case 67:
+	        key_c = true;
+	    break;
+	  	}
+	}
+
+	function onKeyUp(event){
+	  var keyCode = event.keyCode;
+	  switch(keyCode){
+	    case 87:  //w
+	        key_w = false;
+	    break;
+	    case 68:  //d
+	        key_d = false;
+	    break;
+	    case 83:  //s
+	        key_s = false;
+	    break;
+	    case 65: //a
+	        key_a = false;
+	    break;
+	    case 90:
+	        key_z = false;
+	    break;
+	    case 88:
+	        key_x = false;
+	    break;
+	    case 67:
+	        key_c = false;
+	    break;
+	  	}
+	 }
+
+	 var input = function(){
+	 	if(key_w){o.z = o.z - 1;}
+	 	if(key_s){o.z = o.z + 1;}
+	 	if(key_a){o.x = o.x - 1;}
+	 	if(key_d){o.x = o.x + 1;}
+	 	if(key_z){o.u = o.u + 1;}
+	 	if(key_x){o.p = o.p + 1;}
+	 	if(key_c){o.r = o.r + 1;}
+	 	//if(key_d){x = x + 1;}
+	 }
+
+	function render(o){
+		var d = o.d;
+		d = rotate(d, o.u, o.p, o.r);
+		d = translate(d, o.x, o.y, o.z);
+		d = translate(d, -x, -y, -z);
+		d = rotate(d, -u, -p, -r);
+		d = flatten(d);
+		return draw(d);
+	}
+
+
+	var o = new Object();
+	o.point(-1,1,1,"#963");
+	o.point(-1,0,1,"#EDB");
+	o.point(-1,-1,1,"#EDB");
+	o.point(0,1,1,"#963");
+	o.point(0,0,1,"#EDB");
+	o.point(0,-1,1,"#EDB");
+	o.point(1,1,1,"#963");
+	o.point(1,0,1,"#EDB");
+	o.point(1,-1,1,"#EDB");
+
+	o.point(-1,1,0,"#963");
+	o.point(-1,0,0,"#EDB");
+	o.point(-1,-1,0,"#EDB");
+	o.point(0,1,0,"#963");
+	o.point(0,0,0,"#EDB");
+	o.point(0,-1,0,"#EDB");
+	o.point(1,1,0,"#963");
+	o.point(1,0,0,"#EDB");
+	o.point(1,-1,0,"#EDB");
+
+	o.point(-1,1,-1,"#963");
+	o.point(-1,0,-1,"#963");
+	o.point(-1,-1,-1,"#EDB");
+	o.point(0,1,-1,"#963");
+	o.point(0,0,-1,"#963");
+	o.point(0,-1,-1,"#EDB");
+	o.point(1,1,-1,"#963");
+	o.point(1,0,-1,"#963");
+	o.point(1,-1,-1,"#EDB");
+
+	o.point(.5,-2,.5,"#EEF");
+	o.point(.5,-2,-.5,"#EEF");
+	o.point(-.5,-2,.5,"#EEF");
+	o.point(-.5,-2,-.5,"#EEF");
+
+	o.point(.5,-3,.5,"#006");
+	o.point(.5,-3,-.5,"#006");
+	o.point(-.5,-3,.5,"#006");
+	o.point(-.5,-3,-.5,"#006");
+
+	o.point(-1.5,-2.5,0,"#EDB");
+	o.point(1.5,-2.5,0,"#EDB");
+	
+	o.point(-.5,-4,0,"#000");
+	o.point(.5,-4,0,"#000");
+
+	var o_b = new Object();
+
+
+	var rad = 8;
+	for(var i = -rad;i<rad; i++){
+		for(var j = -rad;j<rad; j++){
+
+			if(Math.sqrt(i*i+j*j)<rad){
+			var c = "#3c3";
+			if((i+j)%2==0){
+				c = "#0C0";
+			}
+			o_b.point(i,-5.5,j,c);
+			}
+		}
+	}
+
+
+	z = 40;
+	y = 20;
+	u = -30;
+
+
+	function tick(){
+		input();
+		o.p = o.p +1;
+		document.getElementById("pixel").innerHTML = render(o) + render(o_b);
+	}
+
+	setInterval(tick,1000/60);
+
+</script>
+</body>
+
+</html>
