@@ -59,14 +59,14 @@
 	 
 	function tick(){
 		input();
-		if(c<50){
+		if(c<15){
 			document.getElementById("pixel").innerHTML = '<img src="' + img1 + '" style="position:absolute;left:' + x + 'px;top:' + y + 'px;">';
 		}
 		else{
 			document.getElementById("pixel").innerHTML = '<img src="' + img2 + '" style="position:absolute;left:' + x + 'px;top:' + y + 'px;">';
 		}
 		c = c + 1;
-		if(c>100){c = 0;}
+		if(c>30){c = 0;}
 	}
 	
 	setInterval(tick,1000/60);
